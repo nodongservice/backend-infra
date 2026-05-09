@@ -67,7 +67,7 @@ BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
 - `INFRA_ALERT_DISCORD_WEBHOOK_URL` (모니터링 배포 필수)
 - `GRAFANA_ADMIN_USER` (선택, 미설정 시 `admin`)
 - `GRAFANA_ADMIN_PASSWORD` (선택, 미설정 시 `admin`)
-- `GRAFANA_PUBLIC_URL` (모니터링 배포 권장, 예: `https://api.bridgework.cloud/grafana`)
+- `GRAFANA_PUBLIC_URL` (모니터링 배포 권장, 예: `https://api.bridgework.cloud/grafana/`)
 
 ## 연동 규칙
 - 앱 레포는 자체 배포만 담당하고, 트래픽 전환은 이 레포의 스크립트를 호출

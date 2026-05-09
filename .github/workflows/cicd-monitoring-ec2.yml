@@ -67,11 +67,12 @@ jobs:
 
             MONITORING_DIR="$HOME/bridgework-infra/monitoring"
             mkdir -p "$MONITORING_DIR"
+            GRAFANA_PUBLIC_URL_NORMALIZED="${GRAFANA_PUBLIC_URL%/}/"
 
             {
               printf 'GRAFANA_ADMIN_USER=%s\n' "${GRAFANA_ADMIN_USER:-admin}"
               printf 'GRAFANA_ADMIN_PASSWORD=%s\n' "${GRAFANA_ADMIN_PASSWORD:-admin}"
-              printf 'GRAFANA_PUBLIC_URL=%s\n' "${GRAFANA_PUBLIC_URL}"
+              printf 'GRAFANA_PUBLIC_URL=%s\n' "${GRAFANA_PUBLIC_URL_NORMALIZED}"
               printf 'INFRA_ALERT_DISCORD_WEBHOOK_URL=%s\n' "${INFRA_ALERT_DISCORD_WEBHOOK_URL}"
             } > "$MONITORING_DIR/.env"
 
