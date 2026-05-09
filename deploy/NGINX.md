@@ -18,8 +18,9 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
 ## 2) 도메인/HTTPS
 
 - 도메인: `api.bridgework.cloud`
-- HTTP(`80`) 요청: HTTPS로 301 리다이렉트
+- HTTP(`80`) 요청: Host와 무관하게 `https://api.bridgework.cloud`로 301 리다이렉트
 - HTTPS(`443`) 처리: Let’s Encrypt 인증서 사용
+  - 비정규 Host 요청은 `https://api.bridgework.cloud`로 301 리다이렉트
   - `/etc/letsencrypt/live/api.bridgework.cloud/fullchain.pem`
   - `/etc/letsencrypt/live/api.bridgework.cloud/privkey.pem`
 

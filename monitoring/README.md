@@ -20,6 +20,7 @@ GitHub Actions 배포를 사용할 경우 `.env`는 워크플로우가 자동 �
 선택 Secret:
 - `GRAFANA_ADMIN_USER`
 - `GRAFANA_ADMIN_PASSWORD`
+- `GRAFANA_PUBLIC_URL` (예: `https://api.bridgework.cloud`)
 
 ## 2) 수집 대상
 
