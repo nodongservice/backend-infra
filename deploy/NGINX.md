@@ -37,6 +37,7 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
 | `/api/py/db-health` | FastAPI `bridgework_fastapi_backend`의 `/db-health` |
 | `/api/py/postgis-health` | FastAPI `bridgework_fastapi_backend`의 `/postgis-health` |
 | `/api/py/metrics` | FastAPI `bridgework_fastapi_backend`의 `/metrics` |
+| `/grafana/*` | Grafana `127.0.0.1:3000` |
 
 ### 3.2 Swagger 라우팅
 
