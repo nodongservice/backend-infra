@@ -20,6 +20,29 @@ BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
 - `deploy/spring_blue_green_switch.sh`
 - `deploy/fastapi_blue_green_switch.sh`
 - `deploy/NGINX.md`
+- `monitoring/docker-compose.monitoring.yml`
+- `monitoring/prometheus/*`
+- `monitoring/loki/*`
+- `monitoring/alloy/*`
+- `monitoring/grafana/provisioning/*`
+
+## 모니터링 스택 (Prometheus / Grafana / Loki / Alloy)
+- 실행 위치: EC2 `~/bridgework-infra/monitoring`
+- 실행 명령: `docker compose -f docker-compose.monitoring.yml up -d`
+- 기본 포트:
+  - Prometheus: `9090`
+  - Grafana: `3000`
+  - Loki: `3100`
+  - Alloy UI: `12345`
+
+### 필수 환경변수
+- `INFRA_ALERT_DISCORD_WEBHOOK_URL` (Grafana 인프라 알림 전용)
+- `GRAFANA_ADMIN_USER` (선택, 기본 `admin`)
+- `GRAFANA_ADMIN_PASSWORD` (선택, 기본 `admin`)
+
+### Discord 웹훅 분리 규칙
+- Spring 앱 알림: `SPRING_BOT_DISCORD_WEBHOOK_URL`
+- 인프라/Grafana 알림: `INFRA_ALERT_DISCORD_WEBHOOK_URL`
 
 ## CI/CD
 - 워크플로우: `.github/workflows/cicd-nginx-ec2.yml`

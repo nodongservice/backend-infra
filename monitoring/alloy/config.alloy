@@ -1,0 +1,39 @@
+discovery.docker "bridgework" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "bridgework" {
+  targets = discovery.docker.bridgework.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(bridgework-backend-.*|bridgework-aiserver-.*|bridgework-prometheus|bridgework-grafana|bridgework-loki|bridgework-alloy)"
+    action        = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    target_label = "job"
+    replacement  = "bridgework-containers"
+  }
+}
+
+loki.source.docker "bridgework" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.bridgework.output
+  forward_to = [loki.write.bridgework.receiver]
+}
+
+loki.write "bridgework" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+  external_labels = {
+    service = "bridgework"
+  }
+}
