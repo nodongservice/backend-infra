@@ -45,18 +45,27 @@ BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
 - 인프라/Grafana 알림: `INFRA_ALERT_DISCORD_WEBHOOK_URL`
 
 ## CI/CD
-- 워크플로우: `.github/workflows/cicd-nginx-ec2.yml`
-- 트리거: `main` push(`deploy/**` 변경 시) 또는 수동 실행
-- 동작:
-  1. 인프라 파일을 EC2 `~/bridgework-infra/deploy`로 업로드
-  2. `setup_nginx.sh` 실행
-  3. `nginx -t` 검증 후 reload
+- Nginx 워크플로우: `.github/workflows/cicd-nginx-ec2.yml`
+  - 트리거: `main` push(`deploy/**` 변경 시) 또는 수동 실행
+  - 동작:
+    1. 인프라 파일을 EC2 `~/bridgework-infra/deploy`로 업로드
+    2. `setup_nginx.sh` 실행
+    3. `nginx -t` 검증 후 reload
+- Monitoring 워크플로우: `.github/workflows/cicd-monitoring-ec2.yml`
+  - 트리거: `main` push(`monitoring/**` 변경 시) 또는 수동 실행
+  - 동작:
+    1. 모니터링 파일을 EC2 `~/bridgework-infra/monitoring`로 업로드
+    2. GitHub Secrets로 `.env` 생성
+    3. `docker compose --env-file .env -f docker-compose.monitoring.yml up -d --remove-orphans` 실행
 
 ## GitHub Secrets
 - `EC2_HOST`
 - `EC2_PORT`
 - `EC2_USER`
 - `EC2_SSH_PRIVATE_KEY`
+- `INFRA_ALERT_DISCORD_WEBHOOK_URL` (모니터링 배포 필수)
+- `GRAFANA_ADMIN_USER` (선택, 미설정 시 `admin`)
+- `GRAFANA_ADMIN_PASSWORD` (선택, 미설정 시 `admin`)
 
 ## 연동 규칙
 - 앱 레포는 자체 배포만 담당하고, 트래픽 전환은 이 레포의 스크립트를 호출

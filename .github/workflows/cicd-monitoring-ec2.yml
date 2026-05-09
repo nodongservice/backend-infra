@@ -1,0 +1,74 @@
+name: backend-infra-monitoring-cicd-ec2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "monitoring/**"
+      - ".github/workflows/cicd-monitoring-ec2.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: backend-infra-monitoring-prod-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-monitoring:
+    runs-on: ubuntu-latest
+
+    env:
+      INFRA_ALERT_DISCORD_WEBHOOK_URL: ${{ secrets.INFRA_ALERT_DISCORD_WEBHOOK_URL }}
+      GRAFANA_ADMIN_USER: ${{ secrets.GRAFANA_ADMIN_USER }}
+      GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required monitoring secrets
+        run: |
+          if [ -z "${INFRA_ALERT_DISCORD_WEBHOOK_URL}" ]; then
+            echo "INFRA_ALERT_DISCORD_WEBHOOK_URL secret is required."
+            exit 1
+          fi
+
+      - name: Upload monitoring files to EC2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          source: "monitoring"
+          target: "~/bridgework-infra"
+          strip_components: 0
+
+      - name: Apply monitoring stack on EC2
+        uses: appleboy/ssh-action@v1
+        env:
+          INFRA_ALERT_DISCORD_WEBHOOK_URL: ${{ secrets.INFRA_ALERT_DISCORD_WEBHOOK_URL }}
+          GRAFANA_ADMIN_USER: ${{ secrets.GRAFANA_ADMIN_USER }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          envs: INFRA_ALERT_DISCORD_WEBHOOK_URL,GRAFANA_ADMIN_USER,GRAFANA_ADMIN_PASSWORD
+          script: |
+            set -euo pipefail
+
+            MONITORING_DIR="$HOME/bridgework-infra/monitoring"
+            mkdir -p "$MONITORING_DIR"
+
+            {
+              printf 'GRAFANA_ADMIN_USER=%s\n' "${GRAFANA_ADMIN_USER:-admin}"
+              printf 'GRAFANA_ADMIN_PASSWORD=%s\n' "${GRAFANA_ADMIN_PASSWORD:-admin}"
+              printf 'INFRA_ALERT_DISCORD_WEBHOOK_URL=%s\n' "${INFRA_ALERT_DISCORD_WEBHOOK_URL}"
+            } > "$MONITORING_DIR/.env"
+
+            chmod 600 "$MONITORING_DIR/.env"
+
+            cd "$MONITORING_DIR"
+            docker compose --env-file .env -f docker-compose.monitoring.yml up -d --remove-orphans

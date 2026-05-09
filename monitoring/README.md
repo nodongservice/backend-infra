@@ -12,6 +12,15 @@ cp .env.example .env
 docker compose --env-file .env -f docker-compose.monitoring.yml up -d
 ```
 
+GitHub Actions 배포를 사용할 경우 `.env`는 워크플로우가 자동 생성합니다.
+
+필수 Secret:
+- `INFRA_ALERT_DISCORD_WEBHOOK_URL`
+
+선택 Secret:
+- `GRAFANA_ADMIN_USER`
+- `GRAFANA_ADMIN_PASSWORD`
+
 ## 2) 수집 대상
 
 - Spring metrics: `http://host.docker.internal/api/java/actuator/prometheus`
