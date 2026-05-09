@@ -30,7 +30,12 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
 | 외부 경로 | 내부 대상 |
 |---|---|
 | `/api/java/v1/*` | Spring `bridgework_backend`의 `/api/v1/*` |
+| `/api/java/actuator/*` | Spring `bridgework_backend`의 `/actuator/*` |
 | `/api/py/v1/*` | FastAPI `bridgework_fastapi_backend`의 `/api/v1/*` |
+| `/api/py/health` | FastAPI `bridgework_fastapi_backend`의 `/health` |
+| `/api/py/db-health` | FastAPI `bridgework_fastapi_backend`의 `/db-health` |
+| `/api/py/postgis-health` | FastAPI `bridgework_fastapi_backend`의 `/postgis-health` |
+| `/api/py/metrics` | FastAPI `bridgework_fastapi_backend`의 `/metrics` |
 
 ### 3.2 Swagger 라우팅
 
