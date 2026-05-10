@@ -34,6 +34,6 @@ loki.write "bridgework" {
     url = "http://loki:3100/loki/api/v1/push"
   }
   external_labels = {
-    service = "bridgework"
+    service = "bridgework",
   }
 }
