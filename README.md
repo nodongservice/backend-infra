@@ -1,6 +1,6 @@
 # backend-infra
 
-BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
+BridgeWork 운영 공통 인프라(Nginx + Monitoring) 레포입니다.
 
 ## 운영 구조
 - EC2 인스턴스 1대에서 `backend`(Java Spring)와 `aiserver`(FastAPI)를 함께 운영
@@ -9,6 +9,7 @@ BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
 
 ## 역할
 - `backend`, `aiserver` 레포와 분리된 Nginx 라우팅/업스트림 운영
+- Prometheus/Grafana/Loki/Alloy 모니터링 스택 운영
 - EC2 반영 스크립트 관리
 - 공통 인프라 CI/CD 관리
 
@@ -28,7 +29,7 @@ BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
 
 ## 모니터링 스택 (Prometheus / Grafana / Loki / Alloy)
 - 실행 위치: EC2 `~/bridgework-infra/monitoring`
-- 실행 명령: `docker compose -f docker-compose.monitoring.yml up -d`
+- 실행 명령: `docker compose --env-file .env -f docker-compose.monitoring.yml up -d`
 - 기본 포트:
   - Prometheus: `9090`
   - Grafana: `3000`
@@ -37,9 +38,11 @@ BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
 
 ### 필수 환경변수
 - `INFRA_ALERT_DISCORD_WEBHOOK_URL` (Grafana 인프라 알림 전용)
-- `GRAFANA_ADMIN_USER` (선택, 기본 `admin`)
-- `GRAFANA_ADMIN_PASSWORD` (선택, 기본 `admin`)
-- `GRAFANA_PUBLIC_URL` (선택, Grafana 알림 링크용 외부 접속 URL)
+- `GRAFANA_PUBLIC_URL` (Grafana 알림 링크용 외부 접속 URL)
+
+### 선택 환경변수
+- `GRAFANA_ADMIN_USER` (기본 `admin`)
+- `GRAFANA_ADMIN_PASSWORD` (기본 `admin`)
 
 ### Discord 웹훅 분리 규칙
 - Spring 앱 알림: `SPRING_BOT_DISCORD_WEBHOOK_URL`
@@ -65,9 +68,9 @@ BridgeWork 운영 공통 인프라(Nginx) 전용 레포입니다.
 - `EC2_USER`
 - `EC2_SSH_PRIVATE_KEY`
 - `INFRA_ALERT_DISCORD_WEBHOOK_URL` (모니터링 배포 필수)
+- `GRAFANA_PUBLIC_URL` (모니터링 배포 필수, 예: `https://api.bridgework.cloud/grafana/`)
 - `GRAFANA_ADMIN_USER` (선택, 미설정 시 `admin`)
 - `GRAFANA_ADMIN_PASSWORD` (선택, 미설정 시 `admin`)
-- `GRAFANA_PUBLIC_URL` (모니터링 배포 권장, 예: `https://api.bridgework.cloud/grafana/`)
 
 ## 연동 규칙
 - 앱 레포는 자체 배포만 담당하고, 트래픽 전환은 이 레포의 스크립트를 호출

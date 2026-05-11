@@ -16,11 +16,11 @@ GitHub Actions 배포를 사용할 경우 `.env`는 워크플로우가 자동 �
 
 필수 Secret:
 - `INFRA_ALERT_DISCORD_WEBHOOK_URL`
+- `GRAFANA_PUBLIC_URL` (예: `https://api.bridgework.cloud/grafana/`)
 
 선택 Secret:
 - `GRAFANA_ADMIN_USER`
 - `GRAFANA_ADMIN_PASSWORD`
-- `GRAFANA_PUBLIC_URL` (예: `https://api.bridgework.cloud/grafana/`)
 
 ## 2) 수집 대상
 
