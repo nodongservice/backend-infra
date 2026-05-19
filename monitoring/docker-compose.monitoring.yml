@@ -14,7 +14,7 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
 
   loki:
     image: grafana/loki:3.2.1
@@ -25,7 +25,7 @@ services:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - bridgework-loki-data:/loki
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
 
   alloy:
     image: grafana/alloy:v1.8.2
@@ -43,15 +43,15 @@ services:
     depends_on:
       - loki
     ports:
-      - "12345:12345"
+      - "127.0.0.1:12345:12345"
 
   grafana:
     image: grafana/grafana:11.2.2
     container_name: bridgework-grafana
     restart: unless-stopped
     environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
       GF_SERVER_ROOT_URL: ${GRAFANA_PUBLIC_URL:-http://localhost:3000}
       GF_SERVER_SERVE_FROM_SUB_PATH: "false"
       GF_USERS_ALLOW_SIGN_UP: "false"
@@ -64,7 +64,7 @@ services:
       - prometheus
       - loki
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
 volumes:
   bridgework-prometheus-data:

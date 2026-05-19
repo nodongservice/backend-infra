@@ -32,11 +32,11 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
 |---|---|
 | `/api/java/v1/*` | Spring `bridgework_backend`의 `/api/v1/*` |
 | `/api/java/actuator/*` | Spring `bridgework_backend`의 `/actuator/*` |
-| `/api/py/v1/*` | FastAPI `bridgework_fastapi_backend`의 `/api/v1/*` |
-| `/api/py/health` | FastAPI `bridgework_fastapi_backend`의 `/health` |
-| `/api/py/db-health` | FastAPI `bridgework_fastapi_backend`의 `/db-health` |
-| `/api/py/postgis-health` | FastAPI `bridgework_fastapi_backend`의 `/postgis-health` |
-| `/api/py/metrics` | FastAPI `bridgework_fastapi_backend`의 `/metrics` |
+| `/api/py/v1/*` | 외부 차단(`404`) |
+| `/api/py/health` | 사설/로컬 대역만 FastAPI `/health` 허용 |
+| `/api/py/db-health` | 사설/로컬 대역만 FastAPI `/db-health` 허용 |
+| `/api/py/postgis-health` | 사설/로컬 대역만 FastAPI `/postgis-health` 허용 |
+| `/api/py/metrics` | 사설/로컬 대역만 FastAPI `/metrics` 허용 |
 | `/grafana/*` | Grafana `127.0.0.1:3000` |
 
 ### 3.2 Swagger 라우팅
@@ -45,11 +45,10 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
 |---|---|
 | `/api/java/swagger-ui.html` | Spring Swagger UI |
 | `/api/java/v3/api-docs` | Spring OpenAPI JSON |
-| `/api/py/docs` | FastAPI Swagger UI |
-| `/api/py/openapi.json` | FastAPI OpenAPI JSON |
+| `/api/py/docs` | 외부 차단(`404`) |
+| `/api/py/openapi.json` | 외부 차단(`404`) |
 
-FastAPI docs 페이지는 기본적으로 `/openapi.json`을 참조하므로,  
-Nginx `sub_filter`로 `/api/py/openapi.json`을 참조하도록 재작성합니다.
+FastAPI는 내부 분석 서버이므로 Swagger/OpenAPI와 `/api/v1/*`는 인터넷에 공개하지 않습니다.
 
 ## 4) 포트/업스트림
 
@@ -64,7 +63,7 @@ Nginx `sub_filter`로 `/api/py/openapi.json`을 참조하도록 재작성합니�
 ### 4.2 FastAPI (별도 파이프라인)
 
 - 컨테이너 내부 포트: `8000`
-- 호스트 포트 슬롯: `19000`, `19001`
+- 호스트 포트 슬롯: `127.0.0.1:19000`, `127.0.0.1:19001`
 - Nginx는 `fastapi-upstream.inc`를 참조
 - FastAPI 배포 파이프라인은 새 슬롯 컨테이너 기동/헬스체크 후  
   `fastapi_blue_green_switch.sh <blue|green>`으로 트래픽을 전환
@@ -97,16 +96,16 @@ bash deploy/spring_blue_green_switch.sh green
 - Docs: `/docs`
 - OpenAPI JSON: `/openapi.json`
 
-외부 노출 경로(`/api/py/...`)는 Nginx가 담당합니다.  
-FastAPI 코드에 `api/py` prefix를 직접 넣지 마세요.
+Spring은 FastAPI 슬롯 포트(`19000`, `19001`)를 사설/로컬 경로로 직접 호출합니다.
+FastAPI 코드와 Spring 호출 설정에 `api/py` prefix를 넣지 마세요.
 
 ### 5.2 바꾸면 Nginx도 같이 수정해야 하는 항목
 
 | FastAPI 변경 항목 | Nginx 수정 필요 |
 |---|---|
-| `docs_url` 변경 | `/api/py/docs` 라우팅 |
-| `openapi_url` 변경 | `/api/py/openapi.json` 라우팅 및 `sub_filter` |
-| API prefix 변경 | `/api/py/v1/` 라우팅 대상 |
+| `docs_url` 변경 | 외부 차단 정책 유지 여부 |
+| `openapi_url` 변경 | 외부 차단 정책 유지 여부 |
+| API prefix 변경 | Spring 내부 호출 경로 및 FastAPI 인증 미들웨어 보호 범위 |
 | 내부 포트 변경(8000 외) | `bridgework_fastapi_backend` 업스트림 포트 |
 
 ## 6) 운영 체크 명령
@@ -120,7 +119,8 @@ sudo systemctl status nginx --no-pager
 ```bash
 curl -I https://api.bridgework.cloud
 curl -sS https://api.bridgework.cloud/api/java/v3/api-docs | head
-curl -sS https://api.bridgework.cloud/api/py/openapi.json | head
+curl -i https://api.bridgework.cloud/api/py/openapi.json
+curl -i https://api.bridgework.cloud/api/py/v1/score/quick
 ```
 
 ## 7) 장애 시 우선 확인
