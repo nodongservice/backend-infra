@@ -1,6 +1,6 @@
 # backend-infra
 
-BridgeWork 운영 공통 인프라(Nginx + Monitoring) 레포입니다.
+BridgeWork 운영 공통 인프라(Nginx + Monitoring) 레포입니다..
 
 ## 운영 구조
 - EC2 인스턴스 1대에서 `backend`(Java Spring)와 `aiserver`(FastAPI)를 함께 운영
