@@ -43,6 +43,7 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
 
 | 외부 경로 | 내부 대상 |
 |---|---|
+| `/api/java/docs` | Spring Swagger UI 별칭 |
 | `/api/java/swagger-ui.html` | Spring Swagger UI |
 | `/api/java/v3/api-docs` | Spring OpenAPI JSON |
 | `/api/py/docs` | FastAPI Swagger UI |
