@@ -1,0 +1,9 @@
+aws_region             = "ap-northeast-2"
+vpc_id                 = "vpc-0123456789abcdef0"
+ec2_instance_id        = "i-0123456789abcdef0"
+rds_instance_identifier = "replace-with-production-rds-identifier"
+route53_zone_id        = "Z0123456789EXAMPLE"
+
+additional_tags = {
+  Owner = "bridgework-platform"
+}

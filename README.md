@@ -2,6 +2,18 @@
 
 BridgeWork 운영 공통 인프라(Nginx + Monitoring) 레포입니다.
 
+## 인프라 관리 원칙
+
+- 기존 AWS 운영 자원은 Terraform import-first 방식으로 점진적으로 관리한다.
+- Terraform 원격 state는 암호화, 버전 관리, public access 차단 및 lockfile을 적용한 S3 버킷에 저장한다.
+- 운영 자원 import 전에는 read-only 인벤토리만 실행하며, replace 또는 destroy 계획은 적용하지 않는다.
+- Kubernetes는 현재 서비스 규모와 운영 지표를 기준으로 보류한다. 다중 replica와 자동 확장이 필요해지면 ECS/Fargate와 EKS를 함께 재검토한다.
+
+상세 결정과 도입 단계:
+
+- [Kubernetes 및 Terraform 도입 검토](docs/terraform-kubernetes-review.md)
+- [Terraform 운영 가이드](terraform/README.md)
+
 ## 운영 구조
 - EC2 인스턴스 1대에서 `backend`(Java Spring)와 `aiserver`(FastAPI)를 함께 운영
 - 두 서비스는 동일 인스턴스 내에서 각각 별도의 Docker 컨테이너로 분리 실행
@@ -14,6 +26,8 @@ BridgeWork 운영 공통 인프라(Nginx + Monitoring) 레포입니다.
 - 공통 인프라 CI/CD 관리
 
 ## 디렉터리
+- `terraform/bootstrap/*`
+- `terraform/environments/prod/*`
 - `deploy/nginx/bridgework.conf`
 - `deploy/nginx/bridgework-upstream.inc`
 - `deploy/nginx/fastapi-upstream.inc`

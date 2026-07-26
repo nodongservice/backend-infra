@@ -1,0 +1,50 @@
+name: backend-infra-terraform-validate
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-validate.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        working-directory:
+          - terraform/bootstrap
+          - terraform/environments/prod
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ matrix.working-directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialize without remote backend
+        run: terraform init -backend=false -input=false
+
+      - name: Validate configuration
+        run: terraform validate -no-color
