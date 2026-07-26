@@ -1,0 +1,10 @@
+# Copy one block at a time into imports.tf only after the corresponding
+# resource block has been reviewed against the live AWS configuration.
+#
+# import {
+#   to = aws_instance.application
+#   id = var.ec2_instance_id
+# }
+#
+# Never apply an import plan that also contains update, replace, or destroy
+# actions for the production resource.

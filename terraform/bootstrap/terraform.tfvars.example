@@ -1,0 +1,6 @@
+aws_region       = "ap-northeast-2"
+state_bucket_name = "replace-with-a-globally-unique-bridgework-tfstate-bucket"
+
+additional_tags = {
+  Owner = "bridgework-platform"
+}
