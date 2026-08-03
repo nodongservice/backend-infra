@@ -7,6 +7,12 @@ on:
     paths:
       - "monitoring/**"
       - ".github/workflows/cicd-monitoring-ec2.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "monitoring/**"
+      - ".github/workflows/cicd-monitoring-ec2.yml"
   workflow_dispatch:
 
 concurrency:
@@ -14,7 +20,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-monitoring:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse Alloy configuration
+        run: |
+          docker run --rm \
+            --read-only \
+            --cap-drop ALL \
+            --security-opt no-new-privileges=true \
+            --volume "${GITHUB_WORKSPACE}/monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro" \
+            grafana/alloy:v1.8.2@sha256:8fad63014ac2d69dd5e21e51ec1639bb6f52b43402ff8ca96125ea874b7f6422 \
+            fmt /etc/alloy/config.alloy > /dev/null
+
   deploy-monitoring:
+    needs: validate-monitoring
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     env:
