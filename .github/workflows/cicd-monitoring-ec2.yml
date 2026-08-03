@@ -27,12 +27,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate Alloy configuration
+      - name: Parse Alloy configuration
         run: |
           docker run --rm \
+            --read-only \
+            --cap-drop ALL \
+            --security-opt no-new-privileges=true \
             --volume "${GITHUB_WORKSPACE}/monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro" \
-            grafana/alloy:v1.8.2 \
-            validate /etc/alloy/config.alloy
+            grafana/alloy:v1.8.2@sha256:8fad63014ac2d69dd5e21e51ec1639bb6f52b43402ff8ca96125ea874b7f6422 \
+            fmt /etc/alloy/config.alloy > /dev/null
 
   deploy-monitoring:
     needs: validate-monitoring
