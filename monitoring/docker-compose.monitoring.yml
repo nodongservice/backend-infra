@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: local
+  options:
+    max-size: "20m"
+    max-file: "3"
+
 services:
   prometheus:
     image: prom/prometheus:v2.55.1
@@ -14,7 +20,24 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
+    logging: *default-logging
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.11.1
+    container_name: bridgework-node-exporter
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+      - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/containerd/.+)($|/)
+    volumes:
+      - /:/host:ro,rslave
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging: *default-logging
 
   loki:
     image: grafana/loki:3.2.1
@@ -25,7 +48,8 @@ services:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - bridgework-loki-data:/loki
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
+    logging: *default-logging
 
   alloy:
     image: grafana/alloy:v1.8.2
@@ -43,7 +67,8 @@ services:
     depends_on:
       - loki
     ports:
-      - "12345:12345"
+      - "127.0.0.1:12345:12345"
+    logging: *default-logging
 
   grafana:
     image: grafana/grafana:11.2.2
@@ -64,7 +89,8 @@ services:
       - prometheus
       - loki
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    logging: *default-logging
 
 volumes:
   bridgework-prometheus-data:

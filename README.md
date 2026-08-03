@@ -23,14 +23,14 @@ Application data
   └─ Redis container
 
 Observability
-  ├─ Prometheus -> Grafana
+  ├─ Node Exporter -> Prometheus -> Grafana
   └─ Alloy -> Loki -> Grafana -> Discord
 ```
 
 - 운영 EC2 1대에서 Spring Backend와 FastAPI AI/GIS Service를 별도 Docker 컨테이너로 실행합니다.
 - `api.bridgework.cloud`의 HTTPS 종단과 API·문서 라우팅은 Nginx가 담당합니다.
 - 앱 저장소의 GitHub Actions가 GHCR 이미지를 게시하고 비활성 슬롯을 기동한 뒤 이 저장소의 전환 스크립트를 호출합니다.
-- Prometheus·Grafana·Loki·Alloy가 메트릭, 로그, 대시보드와 Discord 알림을 담당합니다.
+- Node Exporter·Prometheus·Grafana·Loki·Alloy가 호스트 메트릭, 로그, 대시보드와 Discord 알림을 담당합니다.
 
 ## 팀
 
@@ -41,14 +41,18 @@ Observability
 | 최성현 | 백엔드 및 인프라 |
 | 박민정 | 프론트 및 AI 개발 |
 
-## 모니터링 스택 (Prometheus / Grafana / Loki / Alloy)
+## 모니터링 스택 (Node Exporter / Prometheus / Grafana / Loki / Alloy)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/nodongservice/.github/main/images_new/dataflow_1.png" alt="BridgeWork 모니터링 fallback 정기 동기화 기반 운영 안정화 구조" width="100%" />
 </p>
 
-- 기본 포트:
+- 호스트 루프백 전용 포트:
   - Prometheus: `9090`
   - Grafana: `3000`
   - Loki: `3100`
   - Alloy UI: `12345`
+- Grafana는 Nginx HTTPS 경로로만 공개하고 Prometheus, Loki, Alloy 관리 포트는 외부에 직접 노출하지 않습니다.
+- 모든 모니터링 컨테이너는 Docker `local` 로그 드라이버로 `20MB × 3개`까지만 보관합니다.
+- EC2 루트 디스크 가용 공간이 `20%` 미만이면 경고, `10%` 미만이면 긴급 알림을 전송합니다.
+- Loki Compactor는 로그 데이터를 14일 보관 후 삭제합니다.
