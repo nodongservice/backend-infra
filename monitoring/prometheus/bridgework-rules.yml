@@ -31,3 +31,23 @@ groups:
         annotations:
           summary: "Spring 5xx 비율 상승"
           description: "최근 5분 기준 Spring 5xx 비율이 5%를 초과했습니다."
+
+      - alert: RootDiskSpaceLow
+        expr: node_filesystem_avail_bytes{job="node-exporter",mountpoint="/"} / node_filesystem_size_bytes{job="node-exporter",mountpoint="/"} < 0.20
+        for: 10m
+        labels:
+          severity: warning
+          target: ec2-root-disk
+        annotations:
+          summary: "EC2 루트 디스크 여유 공간 부족"
+          description: "루트 디스크의 가용 공간이 10분 이상 20% 미만입니다."
+
+      - alert: RootDiskSpaceCritical
+        expr: node_filesystem_avail_bytes{job="node-exporter",mountpoint="/"} / node_filesystem_size_bytes{job="node-exporter",mountpoint="/"} < 0.10
+        for: 2m
+        labels:
+          severity: critical
+          target: ec2-root-disk
+        annotations:
+          summary: "EC2 루트 디스크 고갈 임박"
+          description: "루트 디스크의 가용 공간이 2분 이상 10% 미만입니다."

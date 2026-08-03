@@ -79,4 +79,5 @@ jobs:
             chmod 600 "$MONITORING_DIR/.env"
 
             cd "$MONITORING_DIR"
+            docker compose --env-file .env -f docker-compose.monitoring.yml config -q
             docker compose --env-file .env -f docker-compose.monitoring.yml up -d --remove-orphans

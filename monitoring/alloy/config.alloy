@@ -7,7 +7,8 @@ discovery.relabel "bridgework" {
 
   rule {
     source_labels = ["__meta_docker_container_name"]
-    regex         = "/(bridgework-backend-.*|bridgework-aiserver-.*|bridgework-prometheus|bridgework-grafana|bridgework-loki|bridgework-alloy)"
+    # Loki와 Alloy 자체 로그의 순환 수집을 막는다.
+    regex         = "/(bridgework-backend-.*|bridgework-aiserver-.*|bridgework-prometheus|bridgework-grafana)"
     action        = "keep"
   }
 
