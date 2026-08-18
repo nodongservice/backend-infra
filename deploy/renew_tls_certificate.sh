@@ -59,11 +59,23 @@ trap cleanup_probe EXIT
 printf '%s' "$probe_value" >"$probe_path"
 chmod 0644 "$probe_path"
 
-served_probe="$(curl --fail --silent --show-error --max-time 15 \
-  --resolve "${TLS_DOMAIN}:80:127.0.0.1" \
-  "http://${TLS_DOMAIN}/.well-known/acme-challenge/${probe_name}")"
+challenge_ready=false
+for attempt in 1 2 3 4 5; do
+  if served_probe="$(curl --fail --silent --show-error --max-time 15 \
+    --noproxy '*' \
+    --resolve "${TLS_DOMAIN}:80:127.0.0.1" \
+    "http://${TLS_DOMAIN}/.well-known/acme-challenge/${probe_name}")" \
+    && [[ "$served_probe" == "$probe_value" ]]; then
+    challenge_ready=true
+    break
+  fi
 
-if [[ "$served_probe" != "$probe_value" ]]; then
+  if (( attempt < 5 )); then
+    sleep "$attempt"
+  fi
+done
+
+if [[ "$challenge_ready" != true ]]; then
   echo "Nginx ACME challenge 경로 검증에 실패했습니다." >&2
   exit 1
 fi

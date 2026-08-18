@@ -28,7 +28,7 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
 - GitHub Actions가 매일 별도로 갱신을 점검해 서버 타이머 장애를 보완합니다.
 - 갱신 후 배포 훅은 `nginx -t` 통과 시에만 Nginx를 reload합니다.
 - 기존 `standalone` 갱신 설정은 공개 경로 검증 후 `webroot`로 자동 전환합니다.
-- 갱신 전 로컬 HTTP challenge 응답을 검사하므로 잘못된 Nginx 설정에서는 Certbot을 실행하지 않습니다.
+- 갱신 전 로컬 HTTP challenge 응답을 제한적으로 재검사하므로 Nginx reload 전환 중에도 안전하게 검증합니다.
 - 남은 유효기간이 21일 미만이면 갱신 작업을 실패 처리하고 Discord로 알립니다.
 
 ## 3) 라우팅 정책
