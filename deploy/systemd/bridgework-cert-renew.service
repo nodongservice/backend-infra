@@ -1,0 +1,9 @@
+[Unit]
+Description=BridgeWork TLS certificate renewal
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/bridgework-renew-tls
+TimeoutStartSec=15min

@@ -7,19 +7,48 @@ on:
     paths:
       - "deploy/**"
       - ".github/workflows/cicd-nginx-ec2.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "deploy/**"
+      - ".github/workflows/cicd-nginx-ec2.yml"
+  schedule:
+    - cron: "23 18 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: backend-infra-nginx-prod-deploy
   cancel-in-progress: false
 
 jobs:
-  deploy-nginx:
+  validate-nginx-infra:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Validate deployment scripts
+        run: bash -n deploy/*.sh
+
+  deploy-nginx:
+    needs: validate-nginx-infra
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Upload nginx infra files to EC2
         uses: appleboy/scp-action@v1
@@ -46,3 +75,23 @@ jobs:
             chmod +x "$HOME/bridgework-infra/deploy"/*.sh
 
             bash "$HOME/bridgework-infra/deploy/setup_nginx.sh"
+            sudo /usr/local/sbin/bridgework-renew-tls
+
+      - name: Notify TLS renewal failure
+        if: failure()
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.INFRA_ALERT_DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "${DISCORD_WEBHOOK_URL}" ]; then
+            exit 0
+          fi
+
+          payload="$(jq -nc \
+            --arg content "🚨 BridgeWork TLS 인증서 갱신 또는 Nginx 배포에 실패했습니다. ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            '{content: $content}')"
+
+          curl --fail --silent --show-error \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$DISCORD_WEBHOOK_URL"

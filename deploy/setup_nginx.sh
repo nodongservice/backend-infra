@@ -37,6 +37,11 @@ NGINX_CONF_DIR="${NGINX_CONF_DIR:-$(resolve_nginx_conf_dir)}"
 CONF_TARGET="${NGINX_CONF_DIR}/bridgework.conf"
 SPRING_UPSTREAM_TARGET="${NGINX_CONF_DIR}/bridgework-upstream.inc"
 FASTAPI_UPSTREAM_TARGET="${NGINX_CONF_DIR}/fastapi-upstream.inc"
+CERTBOT_HOOK_DIR="/etc/letsencrypt/renewal-hooks/deploy"
+CERTBOT_HOOK_TARGET="${CERTBOT_HOOK_DIR}/bridgework-reload-nginx"
+TLS_RENEW_SCRIPT_TARGET="/usr/local/sbin/bridgework-renew-tls"
+TLS_RENEW_SERVICE_TARGET="/etc/systemd/system/bridgework-cert-renew.service"
+TLS_RENEW_TIMER_TARGET="/etc/systemd/system/bridgework-cert-renew.timer"
 
 if [[ ! -d "$NGINX_CONF_DIR" ]]; then
   sudo mkdir -p "$NGINX_CONF_DIR"
@@ -59,9 +64,19 @@ if [[ ! -f "$FASTAPI_UPSTREAM_TARGET" ]]; then
   sudo cp "$SCRIPT_DIR/nginx/fastapi-upstream.inc" "$FASTAPI_UPSTREAM_TARGET"
 fi
 
+# Certbot 갱신 성공 시에만 검증된 Nginx 설정을 다시 읽는다.
+sudo mkdir -p "$CERTBOT_HOOK_DIR"
+sudo install -m 0755 "$SCRIPT_DIR/certbot_reload_nginx.sh" "$CERTBOT_HOOK_TARGET"
+sudo install -m 0755 "$SCRIPT_DIR/renew_tls_certificate.sh" "$TLS_RENEW_SCRIPT_TARGET"
+sudo install -m 0644 "$SCRIPT_DIR/systemd/bridgework-cert-renew.service" "$TLS_RENEW_SERVICE_TARGET"
+sudo install -m 0644 "$SCRIPT_DIR/systemd/bridgework-cert-renew.timer" "$TLS_RENEW_TIMER_TARGET"
+sudo systemctl daemon-reload
+sudo systemctl enable --now bridgework-cert-renew.timer
+
 sudo nginx -t
 sudo systemctl reload nginx
 
 echo "nginx 설정 적용 완료: $CONF_TARGET"
 echo "spring upstream 파일: $SPRING_UPSTREAM_TARGET"
 echo "fastapi upstream 파일: $FASTAPI_UPSTREAM_TARGET"
+echo "TLS 자동 갱신 타이머: bridgework-cert-renew.timer"
