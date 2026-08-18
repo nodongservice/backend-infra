@@ -23,6 +23,10 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
   - 비정규 Host 요청은 `https://api.bridgework.cloud`로 301 리다이렉트
   - `/etc/letsencrypt/live/api.bridgework.cloud/fullchain.pem`
   - `/etc/letsencrypt/live/api.bridgework.cloud/privkey.pem`
+- `bridgework-cert-renew.timer`가 하루 2회 갱신을 점검합니다.
+- GitHub Actions가 매일 별도로 갱신을 점검해 서버 타이머 장애를 보완합니다.
+- 갱신 후 배포 훅은 `nginx -t` 통과 시에만 Nginx를 reload합니다.
+- 남은 유효기간이 21일 미만이면 갱신 작업을 실패 처리하고 Discord로 알립니다.
 
 ## 3) 라우팅 정책
 
@@ -116,6 +120,8 @@ FastAPI 코드에 `api/py` prefix를 직접 넣지 마세요.
 sudo nginx -t
 sudo systemctl reload nginx
 sudo systemctl status nginx --no-pager
+sudo systemctl status bridgework-cert-renew.timer --no-pager
+sudo /usr/local/sbin/bridgework-renew-tls
 ```
 
 ```bash

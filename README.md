@@ -29,6 +29,7 @@ Observability
 
 - 운영 EC2 1대에서 Spring Backend와 FastAPI AI/GIS Service를 별도 Docker 컨테이너로 실행합니다.
 - `api.bridgework.cloud`의 HTTPS 종단과 API·문서 라우팅은 Nginx가 담당합니다.
+- TLS 인증서는 EC2 systemd timer와 GitHub Actions가 이중으로 갱신을 점검하며, 실패 시 운영 알림을 전송합니다.
 - 앱 저장소의 GitHub Actions가 GHCR 이미지를 게시하고 비활성 슬롯을 기동한 뒤 이 저장소의 전환 스크립트를 호출합니다.
 - Node Exporter·Prometheus·Grafana·Loki·Alloy가 호스트 메트릭, 로그, 대시보드와 Discord 알림을 담당합니다.
 
