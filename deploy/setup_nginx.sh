@@ -39,6 +39,7 @@ SPRING_UPSTREAM_TARGET="${NGINX_CONF_DIR}/bridgework-upstream.inc"
 FASTAPI_UPSTREAM_TARGET="${NGINX_CONF_DIR}/fastapi-upstream.inc"
 CERTBOT_HOOK_DIR="/etc/letsencrypt/renewal-hooks/deploy"
 CERTBOT_HOOK_TARGET="${CERTBOT_HOOK_DIR}/bridgework-reload-nginx"
+ACME_CHALLENGE_DIR="/var/www/certbot/.well-known/acme-challenge"
 TLS_RENEW_SCRIPT_TARGET="/usr/local/sbin/bridgework-renew-tls"
 TLS_RENEW_SERVICE_TARGET="/etc/systemd/system/bridgework-cert-renew.service"
 TLS_RENEW_TIMER_TARGET="/etc/systemd/system/bridgework-cert-renew.timer"
@@ -66,6 +67,7 @@ fi
 
 # Certbot 갱신 성공 시에만 검증된 Nginx 설정을 다시 읽는다.
 sudo mkdir -p "$CERTBOT_HOOK_DIR"
+sudo install -d -o root -g root -m 0755 "$ACME_CHALLENGE_DIR"
 sudo install -m 0755 "$SCRIPT_DIR/certbot_reload_nginx.sh" "$CERTBOT_HOOK_TARGET"
 sudo install -m 0755 "$SCRIPT_DIR/renew_tls_certificate.sh" "$TLS_RENEW_SCRIPT_TARGET"
 sudo install -m 0644 "$SCRIPT_DIR/systemd/bridgework-cert-renew.service" "$TLS_RENEW_SERVICE_TARGET"
