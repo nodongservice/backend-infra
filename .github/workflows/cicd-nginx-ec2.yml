@@ -51,6 +51,7 @@ jobs:
           persist-credentials: false
 
       - name: Upload nginx infra files to EC2
+        if: github.event_name != 'schedule'
         uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -70,6 +71,11 @@ jobs:
           port: ${{ secrets.EC2_PORT }}
           script: |
             set -euo pipefail
+
+            if [ "${{ github.event_name }}" = "schedule" ]; then
+              sudo /usr/local/sbin/bridgework-renew-tls
+              exit 0
+            fi
 
             mkdir -p "$HOME/bridgework-infra/deploy"
             chmod +x "$HOME/bridgework-infra/deploy"/*.sh

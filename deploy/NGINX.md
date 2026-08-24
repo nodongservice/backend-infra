@@ -26,6 +26,9 @@ Spring/FastAPI 개발자가 같은 기준으로 라우팅을 유지하도록 작
   - `/etc/letsencrypt/live/api.bridgework.cloud/privkey.pem`
 - `bridgework-cert-renew.timer`가 하루 2회 갱신을 점검합니다.
 - GitHub Actions가 매일 별도로 갱신을 점검해 서버 타이머 장애를 보완합니다.
+- 배포판 기본 `certbot.timer`는 비활성화해 전용 timer와의 중복 실행을 차단합니다.
+- 전용 프로세스 잠금과 Certbot 잠금 충돌 재시도로 수동·예약 작업의 동시 실행을 안전하게 직렬화합니다.
+- 예약 Actions는 Nginx 설정을 재배포하지 않고 설치된 갱신 스크립트만 실행합니다.
 - 갱신 후 배포 훅은 `nginx -t` 통과 시에만 Nginx를 reload합니다.
 - 기존 `standalone` 갱신 설정은 공개 경로 검증 후 `webroot`로 자동 전환합니다.
 - 갱신 전 로컬 HTTP challenge 응답을 제한적으로 재검사하므로 Nginx reload 전환 중에도 안전하게 검증합니다.
