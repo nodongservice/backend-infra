@@ -73,6 +73,13 @@ sudo install -m 0755 "$SCRIPT_DIR/renew_tls_certificate.sh" "$TLS_RENEW_SCRIPT_T
 sudo install -m 0644 "$SCRIPT_DIR/systemd/bridgework-cert-renew.service" "$TLS_RENEW_SERVICE_TARGET"
 sudo install -m 0644 "$SCRIPT_DIR/systemd/bridgework-cert-renew.timer" "$TLS_RENEW_TIMER_TARGET"
 sudo systemctl daemon-reload
+
+# 배포판 기본 timer와 전용 timer가 Certbot을 동시에 실행하지 않게 한다.
+if systemctl list-unit-files --type=timer --no-legend certbot.timer 2>/dev/null | grep -q '^certbot\.timer'; then
+  sudo systemctl disable --now certbot.timer
+  echo "배포판 기본 Certbot timer 비활성화: certbot.timer"
+fi
+
 sudo systemctl enable --now bridgework-cert-renew.timer
 
 sudo nginx -t
